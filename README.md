@@ -8,6 +8,9 @@ Download the ZIP file and install it using the normal Arduino IDE installation p
 
 Make sure to install the PubSubClient by Nick O'Leary library as well. The current version used is 2.7.0 If a newer version is available, you may try to use it instead.
 
+See this YoutTube video for more information:
+https://youtu.be/CQ_i9IjvNpc
+
 Use in your own sketch
 
 Load the MQTTViewer.ino example to see how the library is used in your own sketch.
