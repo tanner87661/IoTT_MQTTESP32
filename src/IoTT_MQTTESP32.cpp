@@ -72,12 +72,9 @@ void MQTTESP32::psc_callback(char* topic, byte* payload, unsigned int length)
 //			Serial.println(sentFrom);
 			if ((strcmp(topic, lnPingTopic) == 0) && (strcmp(sentFrom.c_str(), thisNodeName) != 0))
 			{
-				//this is from ourselfs, just an echo to a sent ping message, so we filter it out
+				//this is a ping command from another node
 			}
-			if (strcmp(topic, lnBCTopic) == 0)
-			{
-			}
-			if (strcmp(topic, lnBCTopic) == 0)
+			if (strcmp(topic, lnBCTopic) == 0) //can be new message or echo from our own message
 			{
 				if (doc.containsKey("Data"))
 				{
@@ -130,6 +127,33 @@ void MQTTESP32::setNodeName(char * newName, bool newUseMAC)
 	}
 }
 
+void MQTTESP32::loadMQTTCfgJSON(DynamicJsonDocument doc)
+{
+	if (doc.containsKey("MQTTServer"))
+		strcpy(&mqtt_server[0], doc["MQTTServer"]);
+    if (doc.containsKey("MQTTPort"))
+        mqtt_port = doc["MQTTPort"];
+    if (doc.containsKey("MQTTUser"))
+		strcpy(&mqtt_user[0], doc["MQTTUser"]);
+    if (doc.containsKey("MQTTPassword"))
+        strcpy(&mqtt_password[0], doc["MQTTPassword"]);
+    if (doc.containsKey("NodeName"))
+        strcpy(&nodeName[0], doc["NodeName"]);
+    if (doc.containsKey("inclMAC"))
+        includeMAC = doc["inclMAC"];
+    if (doc.containsKey("pingDelay"))
+        setPingFrequency(doc["pingDelay"]);
+    if (doc.containsKey("BCTopic"))
+        strcpy(&appBCTopic[0], doc["BCTopic"]);
+    if (doc.containsKey("EchoTopic"))
+        strcpy(&appEchoTopic[0], doc["EchoTopic"]);
+    if (doc.containsKey("PingTopic"))
+        strcpy(&appPingTopic[0], doc["PingTopic"]);
+
+    setServer(mqtt_server, mqtt_port);
+    setNodeName(nodeName);
+}
+
 void MQTTESP32::setMQTTCallback(cbFct newCB)
 {
 	mqttCallback = newCB;
@@ -152,6 +176,7 @@ void MQTTESP32::setPingTopicName(char * newName)
 
 bool MQTTESP32::connectToBroker()
 {
+	Serial.println(thisNodeName);
 	if (connect(thisNodeName)) 
 	{
 		// ... and resubscribe
@@ -159,6 +184,11 @@ bool MQTTESP32::connectToBroker()
 		subscribe(lnPingTopic);
 		subscribe(lnEchoTopic);
 	}
+	else
+	{
+      Serial.print("Connection failed, rc= ");
+      Serial.println(state());
+    }
 	return connected();
 }
 
@@ -179,7 +209,10 @@ uint16_t MQTTESP32::lnWriteMsg(lnTransmitMsg txData)
 		return txData.lnMsgSize;
 	}
 	else
+	{	
+		Serial.println("MQTT Write Error. Too many messages in queue");
 		return -1;
+	}
 }
 
 uint16_t MQTTESP32::lnWriteMsg(lnReceiveBuffer txData)
@@ -198,7 +231,10 @@ uint16_t MQTTESP32::lnWriteMsg(lnReceiveBuffer txData)
 		return txData.lnMsgSize;
 	}
 	else
+	{	
+		Serial.println("MQTT Write Error. Too many messages in queue");
 		return -1;
+	}
 }
 
 void MQTTESP32::setPingFrequency(uint16_t pingSecs)
@@ -282,10 +318,14 @@ void MQTTESP32::processLoop()
       {
         lastReconnectAttempt = now;
         // Attempt to reconnect
+        Serial.println("Reconnect MQTT Broker");
         if (connectToBroker()) 
         {
           lastReconnectAttempt = 0;
+          Serial.println("Success");
         }
+        else
+          Serial.println("Failure");
       }
     } 
     else
