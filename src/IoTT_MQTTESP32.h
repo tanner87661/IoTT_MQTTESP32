@@ -38,46 +38,57 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 class MQTTESP32 : public PubSubClient
 {
 public:
-   MQTTESP32();
-   ~MQTTESP32();
-   MQTTESP32(Client& client);
-   void processLoop();
-   uint16_t lnWriteMsg(lnTransmitMsg txData);
-   uint16_t lnWriteMsg(lnReceiveBuffer txData);
-   void setNodeName(char * newName, bool newUseMAC = true);
-   void setBCTopicName(char * newName);
-   void setEchoTopicName(char * newName);
-   void setPingTopicName(char * newName);
-   void setPingFrequency(uint16_t pingSecs);
-   bool connectToBroker();
-   void setMQTTCallback(cbFct newCB);
+	MQTTESP32();
+	~MQTTESP32();
+	MQTTESP32(Client& client);
+	void processLoop();
+	uint16_t lnWriteMsg(lnTransmitMsg txData);
+	uint16_t lnWriteMsg(lnReceiveBuffer txData);
+	void setNodeName(char * newName, bool newUseMAC = true);
+	void setBCTopicName(char * newName);
+	void setEchoTopicName(char * newName);
+	void setPingTopicName(char * newName);
+	void setPingFrequency(uint16_t pingSecs);
+	bool connectToBroker();
+	void setMQTTCallback(cbFct newCB);
+	void loadMQTTCfgJSON(DynamicJsonDocument doc);
    
   
 private:
    // Member functions
-   bool sendMQTTMessage(lnReceiveBuffer txData);
-   bool sendPingMessage();
+	bool sendMQTTMessage(lnReceiveBuffer txData);
+	bool sendPingMessage();
 
-   static void psc_callback(char* topic, byte* payload, unsigned int length);
+	static void psc_callback(char* topic, byte* payload, unsigned int length);
 
 
    // Member variables
-   lnReceiveBuffer transmitQueue[queBufferSize];
-   uint8_t que_rdPos, que_wrPos;
-   lnReceiveBuffer lnInBuffer;
+	lnReceiveBuffer transmitQueue[queBufferSize];
+	uint8_t que_rdPos, que_wrPos;
+	lnReceiveBuffer lnInBuffer;
    
-   char nodeName[50] = "IoTT-MQTT";	
-   bool useMAC = true;
+	char nodeName[50] = "IoTT-MQTT";	
+	bool useMAC = true;
 
-   uint8_t numWrite, numRead;
+	uint8_t numWrite, numRead;
    
-   uint32_t nextPingPoint;
-   uint32_t pingDelay = 300000; //5 Mins
-   uint32_t respTime;
-   uint8_t  respOpCode;
-   uint16_t respID;
+	uint32_t nextPingPoint;
+	uint32_t pingDelay = 300000; //5 Mins
+	uint32_t respTime;
+	uint8_t  respOpCode;
+	uint16_t respID;
    
-   uint16_t lastReconnectAttempt = millis();
+	uint16_t lastReconnectAttempt = millis();
+	
+	char mqtt_server[50] = "broker.hivemq.com"; // = Mosquitto Server IP "192.168.xx.xx" as loaded from mqtt.cfg
+	uint16_t mqtt_port = 1883; // = Mosquitto port number, standard is 1883, 8883 for SSL connection;
+	char mqtt_user[50] = "";
+	char mqtt_password[50] = "";
+	char appPingTopic[100] = "lnPing";  //ping topic, do not change. This is helpful to find Gateway IP Address if not known. 
+	char appBCTopic[100] = "lnIn";  //default topic, can be specified in mqtt.cfg. Useful when sending messages from 2 different LocoNet networks
+	char appEchoTopic[100] = "lnEcho"; //default topic, can be specified in mqtt.cfg
+	bool includeMAC = true;
+
 };
 
 //this is the callback function. Provide a function of this name and parameter in your application and it will be called when a new message is received

@@ -176,7 +176,6 @@ void MQTTESP32::setPingTopicName(char * newName)
 
 bool MQTTESP32::connectToBroker()
 {
-	Serial.println(thisNodeName);
 	if (connect(thisNodeName)) 
 	{
 		// ... and resubscribe
