@@ -117,9 +117,9 @@ void MQTTESP32::psc_callback(char* topic, byte* payload, unsigned int length)
 
 void MQTTESP32::setNodeName(char * newName, bool newUseMAC)
 {
-	strcpy(&nodeName[0], newName);
+	strcpy(&thisNodeName[0], newName);
 	useMAC = newUseMAC;
-	strcpy(&thisNodeName[0], nodeName);
+//	strcpy(&thisNodeName[0], nodeName);
 	if (useMAC)
 	{
 		String hlpStr = String(ESP_getChipId());
@@ -130,28 +130,31 @@ void MQTTESP32::setNodeName(char * newName, bool newUseMAC)
 void MQTTESP32::loadMQTTCfgJSON(DynamicJsonDocument doc)
 {
 	if (doc.containsKey("MQTTServer"))
-		strcpy(&mqtt_server[0], doc["MQTTServer"]);
+		strcpy(mqtt_server, doc["MQTTServer"]);
     if (doc.containsKey("MQTTPort"))
         mqtt_port = doc["MQTTPort"];
     if (doc.containsKey("MQTTUser"))
-		strcpy(&mqtt_user[0], doc["MQTTUser"]);
+		strcpy(mqtt_user, doc["MQTTUser"]);
     if (doc.containsKey("MQTTPassword"))
-        strcpy(&mqtt_password[0], doc["MQTTPassword"]);
+        strcpy(mqtt_password, doc["MQTTPassword"]);
     if (doc.containsKey("NodeName"))
-        strcpy(&nodeName[0], doc["NodeName"]);
+        strcpy(nodeName, doc["NodeName"]);
     if (doc.containsKey("inclMAC"))
         includeMAC = doc["inclMAC"];
     if (doc.containsKey("pingDelay"))
         setPingFrequency(doc["pingDelay"]);
     if (doc.containsKey("BCTopic"))
-        strcpy(&appBCTopic[0], doc["BCTopic"]);
+        strcpy(appBCTopic, doc["BCTopic"]);
     if (doc.containsKey("EchoTopic"))
-        strcpy(&appEchoTopic[0], doc["EchoTopic"]);
+        strcpy(appEchoTopic, doc["EchoTopic"]);
     if (doc.containsKey("PingTopic"))
-        strcpy(&appPingTopic[0], doc["PingTopic"]);
+        strcpy(appPingTopic, doc["PingTopic"]);
 
     setServer(mqtt_server, mqtt_port);
-    setNodeName(nodeName);
+    setNodeName(nodeName, includeMAC);
+    setBCTopicName(appBCTopic);
+    setEchoTopicName(appEchoTopic);
+    setPingTopicName(appPingTopic);
 }
 
 void MQTTESP32::setMQTTCallback(cbFct newCB)
@@ -256,7 +259,7 @@ bool MQTTESP32::sendPingMessage()
     serializeJson(doc, myMqttMsg);
     if (connected())
     {
-      if (!publish(lnPingTopic, myMqttMsg)) 
+      if (!publish(appPingTopic, myMqttMsg)) 
       {
 //        	Serial.println(F("Ping Failed"));
 			return false;
