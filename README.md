@@ -19,6 +19,9 @@ In a nutshell:
 
 - Add an include statement to your sketch: #include <IoTT_MQTTESP32.h>
 - also add the WiFi library
+- set the MQTT_MAX_PACKET_SIZE constant in PubSubClient.h  to a higher value, e.g. 480
+  #define MQTT_MAX_PACKET_SIZE 480
+
 
 - define the MQTT broker to be used
 - define your Wifi Access Point credentials
