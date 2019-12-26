@@ -295,7 +295,7 @@ bool MQTTESP32::sendMQTTMessage(lnReceiveBuffer txData)
       if ((txData.errorFlags & msgEcho) > 0)  //send echo message if echo flag is set 
         if (!publish(lnEchoTopic, myMqttMsg))
         {
-          return false;
+			return false;
         } else 
         {
 			return true;
@@ -303,13 +303,13 @@ bool MQTTESP32::sendMQTTMessage(lnReceiveBuffer txData)
       else  //otherwise send BC message (in direct mode, meaning the command came in via lnOutTopic)
         if (!publish(lnBCTopic, myMqttMsg))
         {
-          return true;
+			return false; //changed from true
         } else 
         {
 			return true;
         }
     }
-	return true;
+	return false; //changed from true
 }
 void MQTTESP32::processLoop()
 {

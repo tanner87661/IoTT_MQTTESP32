@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <PubSubClient.h> //standard library, install using library manager
 
 
-#define reconnectInterval 5000  //if not connected, try to reconnect every 5 Secs
+#define reconnectInterval 60000  //if not connected, try to reconnect every 5 Secs
 #define queBufferSize 50 //messages that can be written in one burst before buffer overflow
 
 class MQTTESP32 : public PubSubClient
